@@ -1,5 +1,5 @@
 /*****************************************
-* ESP32 GPS VKEL 9600 Bds
+* ESP32 GPS Bluetooth Serial
 ******************************************/
 #include <stdint.h>
 #include <TinyGPS++.h>  
@@ -7,9 +7,10 @@
 #include "lmic.h"
 #include <hal/hal.h>
 #include "config.h"
+#include "BluetoothSerial.h"
 
-TinyGPSPlus gps;                            
-HardwareSerial GPSSerial(1);                
+TinyGPSPlus gps;
+BluetoothSerial GPSSerial;
 int nbloop;
 uint8_t txBuffer[10];
 
@@ -61,19 +62,14 @@ void buildPacket(TinyGPSPlus tGps, uint8_t txBuffer[10]){
   txBuffer[9] = satGps & 0xFF;
 }
 
-void encode(){      
-    int previousMillis = millis();
-
-    while((previousMillis + 1000) > millis()){
-        while (GPSSerial.available() ){
-            char data = GPSSerial.read();
-            gps.encode(data);
-        }
+void readGps() {
+    if (GPSSerial.available()) {
+        char data = GPSSerial.read();
+        gps.encode(data);
     }
 }
 
 bool checkGpsFix(){
-  encode();
   if (gps.location.isValid() && 
       gps.location.age() < 2000 &&
       gps.hdop.isValid() &&
@@ -133,17 +129,27 @@ void do_send(osjob_t* j){
 }
 
 void setup() {
-  Serial.begin(9600); //115200);
-  delay(2500);
-  GPSSerial.begin(9600, SERIAL_8N1, 12, 15);   //17-TX 18-RX
-  GPSSerial.setTimeout(2);
+  Serial.begin(115200);
+  delay(1500);
+  GPSSerial.begin("ESPBT", true);
+  GPSSerial.setPin(BTPIN);
+
+  bool connected = GPSSerial.connect(BTMAC);
+
+  if(connected) {
+    Serial.println("Connected Succesfully!");
+  } else {
+    while(!GPSSerial.connected(10000)) {
+      Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app.");
+    }
+  }
 
   Serial.println(F("Setup"));
 
   screen_setup();
   screen_show_logo();
   screen_update();
-  delay(5000);
+  delay(2000);
 
   // LMIC init
   os_init();
@@ -279,4 +285,5 @@ void onEvent (ev_t ev) {
 
 void loop(){
   os_runloop_once();
+  readGps();
 }
