@@ -28,10 +28,10 @@ const unsigned TX_INTERVAL = (1*60);
 
 // Pin mapping
 const lmic_pinmap lmic_pins = {
-    .nss = 18,
+    .nss = 5,
     .rxtx = LMIC_UNUSED_PIN,
-    .rst = 14,
-    .dio = {26, 33, 32}  // Pins for the Heltec ESP32 Lora board/ TTGO Lora32 with 3D metal antenna
+    .rst = LMIC_UNUSED_PIN,
+    .dio = {39, 32, LMIC_UNUSED_PIN}  // Pins for the Heltec ESP32 Lora board/ TTGO Lora32 with 3D metal antenna
 };
 
 void buildPacket(TinyGPSPlus tGps, uint8_t txBuffer[10]){
