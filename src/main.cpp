@@ -140,9 +140,7 @@ void setup() {
   GPSSerial.begin("ESPBT", true);
   GPSSerial.setPin(BTPIN);
 
-  bool connected = GPSSerial.connect(BTMAC);
-
-  if(connected) {
+  if(GPSSerial.connect(BTMAC)) {
     Serial.println("Connected Succesfully!");
   } else {
     while(!GPSSerial.connected(10000)) {
