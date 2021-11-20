@@ -82,6 +82,10 @@ bool checkGpsFix(){
   } else {
     Serial.println("No gps Fix.");
     Serial.println(gps.location.lat());
+    screen_clear();
+    screen_print( "NO GPS",0,0);
+    screen_update();
+
     return false;
   }
 }
@@ -106,6 +110,8 @@ void do_send(osjob_t* j){
         Serial.print("Altitude  : ");
         Serial.print(gps.altitude.feet() / 3.2808);
         Serial.println("M");
+        Serial.print("HDOP      : ");
+        Serial.println(gps.hdop.value());
         Serial.print("Time      : ");
         Serial.print(gps.time.hour());
         Serial.print(":");
